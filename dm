@@ -5,8 +5,6 @@ DMENU_CACHE=$DMENU_CONFIG/cache
 mkdir -p $DMENU_CONFIG
 [ ! -e "$DMENU_CACHE" ] && touch $DMENU_CACHE
 
-dmenu=('dmenu' '-i' '-l 5')
-
 _usage() {
     printf "\nUsage:\n\tdmenu [options] <command> [command options]\n"
     printf "Commands:\n"
@@ -22,11 +20,24 @@ _usage() {
     printf "\n"
 }
 
+# default backend dmenu
+dmenu=('dmenu' '-i' '-l 5')
+
+args=$(getopt -q -o b: -l "backend:" -n "$(basename $0)" -- "$@")
+test $? -ne 0 && _usage && exit 1
+eval set -- "$args"; while true; do
+    case "$1" in
+        # UGLY HACK: for fzf
+        -b|--backend) shift; dmenu=("$1" "--reverse"); shift ;;
+        --) shift; break ;;
+    esac
+done # $@ will store all remaing args
+
 _recursive() {
     test -z $1 && f="." || f="$1"; cd $f
     while test -n "$f"; do
         pat=$(pwd)
-        f=$( ls -1la --group-directories-first | tail -n +3 | ${dmenu[*]} -p "$pat" | awk '{$1=$2=$3=$4=$5=$6=$7=$8=""; gsub(/^[ \t]+|[ \t]+$/,""); print}')
+        f=$( ls -1la --group-directories-first | tail -n +3 | ${dmenu[*]} | awk '{$1=$2=$3=$4=$5=$6=$7=$8=""; gsub(/^[ \t]+|[ \t]+$/,""); print}')
         test -d "$f" && cd "$f" || { test -f "$f" && echo "${pat}/$f" && unset f; }
     done
 }
@@ -61,7 +72,7 @@ _tags() {
 }
 
 _run() {
-    dmenu_path | ${dmenu[*]} | ${SHELL:-"/usr/bin/sh"} &
+    echo $PATH | tr ':' ' ' | xargs find  | ${dmenu[*]}
 }
 
 _menu() {
@@ -71,13 +82,13 @@ _menu() {
 case "$1" in
     re|recursive) shift; _recursive $@;;
     fm|filemanager|filemgr) shift; _filemanager $@;;
-    fi|find) shift; dmenu+=("-p Find: "); _find $@;;
-    op|open) shift; dmenu+=("-p Open: "); _open $@;;
-    sw|switch) shift; dmenu+=("-p Switch: "); _switch;;
-    ps|process) shift; dmenu+=("-p Process: "); _process;;
-    tg|tags) shift; dmenu+=("-p Tags: "); [ $# -eq 0 ] && _usage || _tags $@;;
-    rn|run) shift; dmenu+=("-p Run: "); _run;;
-    mn|menu) shift; dmenu+=("-p Menu: "); _menu;;
+    fi|find) shift; _find $@;;
+    op|open) shift; _open $@;;
+    sw|switch) shift; _switch;;
+    ps|process) shift; _process;;
+    tg|tags) shift; [ $# -eq 0 ] && _usage || _tags $@;;
+    rn|run) shift; _run;;
+    mn|menu) shift; _menu;;
     *) if [ $# -eq 0 ] ; then { while read -r line; do echo "$line"; done | ${dmenu}; } else _usage; fi ;;
 esac
 exit $?
