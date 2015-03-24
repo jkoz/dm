@@ -22,7 +22,7 @@ _usage() {
 
 # default backend dmenu
 #dmenu=('dmenu' '-i' '-l 5')
-dmenu=('fzf' '--reverse')
+dmenu=("fzf --reverse")
 
 args=$(getopt -q -o b: -l "backend:" -n "$(basename $0)" -- "$@")
 test $? -ne 0 && _usage && exit 1
