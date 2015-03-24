@@ -34,8 +34,8 @@ Commands:
 
 ```sh
 st -c Fzf -e sh -c "dm -b fzf ps"
-xterm -e "sh -c fzf"
 ```
+
 - Xterm
 
 ```sh
