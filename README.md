@@ -1,36 +1,43 @@
-# Objective
+A collection of fuzzy finder scripts
+==============
 
-A simple place holder for various dmenu scripts.
+## Dependencies
 
-# Current feature
+- fzf, slmenu, dmenu, etc.
+- wmctrl, xdotool
+- silver search
+- xdg-open
+- ctags
 
-- Recursive open files in directory using silver searcher
-- File manager based on xdg-open
-- Switch windows based on wmctrl and xdotool
-- Run command in $PATH, similar with original dmenu_run
-- List tags on a given file, used with vim
-
-##  Kill process listed (similar with htop, top)
-
-### Within terminal  
+## Feature
 
 ```sh
-dm -b fzf ps
+> dm -h
+
+Usage:
+        dm [options] <command> [command options]
+Commands:
+        re|recursive    File manager (select only)
+        fm|filemgr      File manager (xdg-open)
+        fi|find         Find (select only)
+        op|open         Find (xdg-open)
+        sw|switch       Switch windows
+        ps|process      Kill process
+        rn|run          Launcher
+        tg|tags <file>  Tags
+        mn|menu         Shortkeys (sxhkd)
 ```
-### In X
+
+## Run in a launcher
+
+- St (preferred)
 
 ```sh
 st -c Fzf -e sh -c "dm -b fzf ps"
+xterm -e "sh -c fzf"
 ```
+- Xterm
 
-
-## Run a command defined in sxhkrc
-
-# Dependencies
-
-- dmenu
-- wmctrl, xdotool
-- silver search
-- xdg
-- ctags
-
+```sh
+xterm -e "sh -c fzf"
+```

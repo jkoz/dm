@@ -6,29 +6,30 @@ mkdir -p $DMENU_CONFIG
 [ ! -e "$DMENU_CACHE" ] && touch $DMENU_CACHE
 
 _usage() {
-    printf "\nUsage:\n\tdmenu [options] <command> [command options]\n"
+    printf "\nUsage:\n\tdm [options] <command> [command options]\n"
     printf "Commands:\n"
-    printf "\tre|recursive\trecursive list directory\n"
-    printf "\tfm|filemgr\tfile manager\n"
-    printf "\tfi|find\t\trecusive find current directoru\n"
-    printf "\top|open\t\trecusive find current directoru and open it\n"
-    printf "\tsw|switch\tswitch windows\n"
-    printf "\tps|process\tlist current process and kill it\n"
-    printf "\trn|run\t\tdmenu_run\n"
-    printf "\ttg|tags\t\ttags file\n"
-    printf "\tmn|menu\t\tmenu shortkeys\n"
+    printf "\tre|recursive\tFile manager (select only)\n"
+    printf "\tfm|filemgr\tFile manager (xdg-open)\n"
+    printf "\tfi|find\t\tFind (select only)\n"
+    printf "\top|open\t\tFind (xdg-open)\n"
+    printf "\tsw|switch\tSwitch windows\n"
+    printf "\tps|process\tKill process\n"
+    printf "\trn|run\t\tLauncher\n"
+    printf "\ttg|tags <file>\tTags\n"
+    printf "\tmn|menu\t\tShortkeys (sxhkd)\n"
     printf "\n"
 }
 
 # default backend dmenu
-dmenu=('dmenu' '-i' '-l 5')
+#dmenu=('dmenu' '-i' '-l 5')
+dmenu=('fzf' '--reverse')
 
 args=$(getopt -q -o b: -l "backend:" -n "$(basename $0)" -- "$@")
 test $? -ne 0 && _usage && exit 1
 eval set -- "$args"; while true; do
     case "$1" in
         # UGLY HACK: for fzf
-        -b|--backend) shift; dmenu=("$1" "--reverse"); shift ;;
+        -b|--backend) shift; dmenu=("$1"); shift ;;
         --) shift; break ;;
     esac
 done # $@ will store all remaing args
@@ -72,11 +73,15 @@ _tags() {
 }
 
 _run() {
-    echo $PATH | tr ':' ' ' | xargs find  | ${dmenu[*]}
+    echo $PATH | tr ':' ' ' | xargs find  | ${dmenu[*]} | $SHELL
 }
 
 _menu() {
-    eval "$(sed 's/^    //g' ~/.config/sxhkd/sxhkdrc | awk '/^# /{if (x)print x;x="";}{x=(!x)?$0:x", » "$0;}END{print x;}' | column -t -s"," | ${dmenu[*]} | awk -F'»' '{print $3}')" &
+    sed 's/^    //g' ~/.config/sxhkd/sxhkdrc | awk '/^# /{if (x)print x;x="";}{x=(!x)?$0:x", » "$0;}END{print x;}' | column -t -s"," | ${dmenu[*]} | awk -F'»' '{print $3}' | $SHELL
+}
+
+_lines() {
+    cat -n $@ | ${dmenu[*]}
 }
 
 case "$1" in
@@ -89,6 +94,7 @@ case "$1" in
     tg|tags) shift; [ $# -eq 0 ] && _usage || _tags $@;;
     rn|run) shift; _run;;
     mn|menu) shift; _menu;;
+    ln|lines) shift; [ $# -eq 0 ] && _usage || _lines $@;;
     *) if [ $# -eq 0 ] ; then { while read -r line; do echo "$line"; done | ${dmenu}; } else _usage; fi ;;
 esac
 exit $?
