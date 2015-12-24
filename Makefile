@@ -11,9 +11,7 @@ clean: ${PROG}
 	@rm -f ${PROG}
 
 install: ${PROG}
-	@mkdir -p $(BINPREFIX)
-	@cp -p dm $(BINPREFIX)
-	@chmod 755 $(BINPREFIX)/dm
+	@install -m755 dm $(BINPREFIX)/dm
 
 uninstall:
 	@rm -f $(BINPREFIX)/dm
