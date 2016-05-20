@@ -17,6 +17,7 @@ _usage() {
     printf "\trn|run\t\tLauncher\n"
     printf "\ttg|tags <file>\tTags\n"
     printf "\tmn|menu\t\tShortkeys (sxhkd)\n"
+    printf "\tbm|bookmark\t\tVimb bookmark\n"
     printf "\n"
 }
 
@@ -80,6 +81,10 @@ _menu() {
     sed 's/^    //g' ~/.config/sxhkd/sxhkdrc | awk '/^# /{if (x)print x;x="";}{x=(!x)?$0:x", » "$0;}END{print x;}' | column -t -s"," | ${dmenu[*]} | awk -F'»' '{print $3}' | $SHELL
 }
 
+_bookmark() {
+    tac ~/.config/vimb/bookmark | sed -r 's/(.*)\t(.*)\t/\2 »»  \1/g' | ${dmenu[*]} | awk '{print $NF}'
+}
+
 _lines() {
     cat -n $@ | ${dmenu[*]}
 }
@@ -95,6 +100,7 @@ case "$1" in
     rn|run) shift; _run;;
     mn|menu) shift; _menu;;
     ln|lines) shift; [ $# -eq 0 ] && _usage || _lines $@;;
+    bm|bookmark) shift; _bookmark;;
     *) if [ $# -eq 0 ] ; then { while read -r line; do echo "$line"; done | ${dmenu}; } else _usage; fi ;;
 esac
 exit $?
