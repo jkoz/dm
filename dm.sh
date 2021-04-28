@@ -62,7 +62,8 @@ _open() {
 }
 
 _switch() {
-    wmctrl -lx | sed -r -e 's/[^@]'$(uname -n)'//' | ${dmenu[*]} | cut -d' ' -f1 | xargs xdotool windowactivate
+    # wmctrl -lx | sed -r -e 's/[^@]'$(uname -n)'//' | ${dmenu[*]} | cut -d' ' -f1 | xargs xdotool windowactivate
+    wmctrl -lx | awk '{print $3,$1}'| column -t | ${dmenu[*]} | awk '{print $2}' |  xargs xdotool windowactivate
 }
 
 _process() {
